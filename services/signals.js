@@ -82,7 +82,7 @@ class SignalService {
           `🎯 Alvo previsto: ${this.pendingSignal.target.toFixed(2)}x`,
           `🛡 Proteção usada: ${this.pendingSignal.protection.toFixed(2)}x`
         ].join('\n');
-        const greenImagePath = path.join(process.cwd(), 'green.png');
+        const greenImagePath = path.resolve(__dirname, '..', 'green.png');
         if (fs.existsSync(greenImagePath)) {
           await this.sock.sendMessage(group.id, {
             image: fs.readFileSync(greenImagePath),
@@ -132,9 +132,7 @@ class SignalService {
       confidenceBar(signal.confidence),
       '',
       `🕐 Enviado às: ${nowTime()}`,
-      `💫 Plataforma: ${settings.platformName}`,
-      '',
-      '🔗 https://sl1nk.com/ganhar-acesso-vip-100'
+      `💫 Plataforma: ${settings.platformName}`
     ].join('\n');
   }
 }
