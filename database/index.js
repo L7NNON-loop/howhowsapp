@@ -16,12 +16,20 @@ async function ensureBaseStructure() {
 
   if (!groupsSnap.exists()) {
     await set(groupsRef, {
-      slot1: { id: '120000000000001@g.us', ativo: false, nome: 'SLOT 1' },
+      slot1: { id: '120363425136994613@g.us', ativo: true, nome: 'Sala VIP Principal' },
       slot2: { id: '120000000000002@g.us', ativo: false, nome: 'SLOT 2' },
       slot3: { id: '120000000000003@g.us', ativo: false, nome: 'SLOT 3' },
       slot4: { id: '120000000000004@g.us', ativo: false, nome: 'SLOT 4' },
       slot5: { id: '120000000000005@g.us', ativo: false, nome: 'SLOT 5' }
     });
+  } else {
+    const groups = groupsSnap.val() || {};
+    const hasMainGroup = Object.values(groups).some((g) => g?.id === '120363425136994613@g.us');
+    if (!hasMainGroup) {
+      await update(groupsRef, {
+        slot1: { id: '120363425136994613@g.us', ativo: true, nome: 'Sala VIP Principal' }
+      });
+    }
   }
 
   if (!statusSnap.exists()) {

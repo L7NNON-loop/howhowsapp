@@ -30,7 +30,13 @@ class SignalService {
         const candles = await fetchCandles();
         const newest = candles[0];
 
-        if (this.lastCandle !== null && newest !== this.lastCandle) {
+        if (this.lastCandle === null) {
+          this.lastCandle = newest;
+          await this.generateAndSendSignal(candles);
+          continue;
+        }
+
+        if (newest !== this.lastCandle) {
           await this.resolvePreviousSignal(newest);
           await this.generateAndSendSignal(candles);
         }

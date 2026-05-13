@@ -80,8 +80,26 @@ git clone https://github.com/SEU_USUARIO/howhowsapp.git
 cd ~/howhowsapp
 
 npm install
-npm start
+npm link
+aviator start
 ```
+
+
+### Comando rápido para atualizar do GitHub e iniciar
+Depois de clonar e entrar na pasta do projeto, rode uma vez:
+```bash
+npm link
+```
+Isso cria o comando global `aviator`.
+
+Sempre que alterar algo no GitHub (ex.: novo ID de grupo), use:
+```bash
+aviator start
+```
+Esse comando faz automaticamente:
+1. `git pull --rebase`
+2. `npm install`
+3. `node index.js`
 
 ## Se aparecer erro "cd: howhowsapp: No such file or directory"
 Use estes comandos:
@@ -99,7 +117,8 @@ Você está fora da pasta do projeto. Rode:
 ```bash
 cd ~/howhowsapp
 npm install
-npm start
+npm link
+aviator start
 ```
 
 ## Observações
