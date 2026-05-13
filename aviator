@@ -1,0 +1,18 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -e
+
+ACTION="$1"
+
+if [ "$ACTION" != "start" ]; then
+  echo "Uso: ./aviator start  (ou: bash aviator start)"
+  exit 1
+fi
+
+echo "🔄 Atualizando projeto do GitHub..."
+git pull --rebase
+
+echo "📦 Instalando dependências..."
+npm install
+
+echo "🚀 Iniciando bot..."
+node index.js
