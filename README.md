@@ -68,15 +68,36 @@ Comandos admin:
 Comando livre:
 - `.id`
 
-## Instalação no Termux
-```bash
-pkg update -y
-pkg upgrade -y
-pkg install nodejs -y
-pkg install git -y
+## Instalação no Termux (passo a passo, sem erro)
+> **Importante:** não use `< >` no comando `git clone`.
 
-git clone <SEU_REPOSITORIO_GITHUB>
-cd howhowsapp
+```bash
+pkg update -y && pkg upgrade -y
+pkg install nodejs git -y
+
+cd ~
+git clone https://github.com/SEU_USUARIO/howhowsapp.git
+cd ~/howhowsapp
+
+npm install
+npm start
+```
+
+## Se aparecer erro "cd: howhowsapp: No such file or directory"
+Use estes comandos:
+```bash
+cd ~
+ls
+```
+Veja o nome exato da pasta clonada e entre nela com:
+```bash
+cd NOME_EXATO_DA_PASTA
+```
+
+## Se aparecer erro ENOENT no package.json
+Você está fora da pasta do projeto. Rode:
+```bash
+cd ~/howhowsapp
 npm install
 npm start
 ```
