@@ -96,14 +96,12 @@ class SignalService {
   async triggerImmediateSignalForGroup(groupId) {
     const candles = await fetchCandles();
     const signal = analyzeCandles(candles);
-    if (!signal) return { sent: false, reason: 'Sem dados suficientes para análise.' };
+    if (!signal) return { sent: false, reason: 'Não foi possível analisar as velas recebidas da API.' };
 
     this.pendingSignal = { ...signal, createdAt: Date.now() };
     await saveSignalHistory({ type: 'signal_manual', ...signal, groupId });
 
-    if (!(await isGroupSignalActive(groupId))) {
-      return { sent: false, reason: 'Grupo não está ativo para sinais.' };
-    }
+    if (!(await isGroupSignalActive(groupId))) return { sent: false, reason: 'Grupo não está ativo para sinais.' };
 
     await this.sock.sendMessage(groupId, { text: this.buildSignalMessage(signal) });
     return { sent: true, signal };

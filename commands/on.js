@@ -14,9 +14,9 @@ module.exports = async ({ sock, message, signalService }) => {
   try {
     const immediate = await signalService.triggerImmediateSignalForGroup(groupId);
     if (!immediate.sent) {
-      await sock.sendMessage(groupId, { text: `⚠️ Ainda não consegui gerar entrada agora: ${immediate.reason}` });
+      await sock.sendMessage(groupId, { text: `⚠️ ${immediate.reason}` });
     }
   } catch (err) {
-    await sock.sendMessage(groupId, { text: '⚠️ Ativado com sucesso, mas falhou o envio imediato. Vou continuar monitorando novas velas.' });
+    await sock.sendMessage(groupId, { text: '⚠️ Ativado com sucesso. O monitor automático continua ativo e enviará a próxima entrada.' });
   }
 };
