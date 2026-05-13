@@ -1,4 +1,6 @@
 const settings = require('../config/settings');
+const fs = require('fs');
+const path = require('path');
 const delay = require('../utils/delay');
 const { nowTime, confidenceBar } = require('../utils/formatters');
 const { fetchCandles } = require('./api');
@@ -80,7 +82,15 @@ class SignalService {
           `🎯 Alvo previsto: ${this.pendingSignal.target.toFixed(2)}x`,
           `🛡 Proteção usada: ${this.pendingSignal.protection.toFixed(2)}x`
         ].join('\n');
-        await this.sock.sendMessage(group.id, { text: msg });
+        const greenImagePath = path.resolve(__dirname, '..', 'green.png');
+        if (fs.existsSync(greenImagePath)) {
+          await this.sock.sendMessage(group.id, {
+            image: fs.readFileSync(greenImagePath),
+            caption: msg
+          });
+        } else {
+          await this.sock.sendMessage(group.id, { text: msg });
+        }
         await delay(settings.messageDelayMs);
       }
       await saveSignalHistory({ type: 'green', currentCandle, signal: this.pendingSignal });
@@ -96,14 +106,12 @@ class SignalService {
   async triggerImmediateSignalForGroup(groupId) {
     const candles = await fetchCandles();
     const signal = analyzeCandles(candles);
-    if (!signal) return { sent: false, reason: 'Sem dados suficientes para análise.' };
+    if (!signal) return { sent: false, reason: 'Não foi possível analisar as velas recebidas da API.' };
 
     this.pendingSignal = { ...signal, createdAt: Date.now() };
     await saveSignalHistory({ type: 'signal_manual', ...signal, groupId });
 
-    if (!(await isGroupSignalActive(groupId))) {
-      return { sent: false, reason: 'Grupo não está ativo para sinais.' };
-    }
+    if (!(await isGroupSignalActive(groupId))) return { sent: false, reason: 'Grupo não está ativo para sinais.' };
 
     await this.sock.sendMessage(groupId, { text: this.buildSignalMessage(signal) });
     return { sent: true, signal };
@@ -113,22 +121,17 @@ class SignalService {
     return [
       '🎰 NEXUS AI 🎰',
       '━━━━━━━━━━━━━━',
-      '',
       '✅ ENTRADA CONFIRMADA ✅',
       '',
       '🚀 Aviator',
       '',
       `📊 Após: ${signal.after.toFixed(2)}x`,
-      '',
       `🎯 Sacar em: ${signal.target.toFixed(2)}x`,
-      '',
       `🛡 Proteção: ${signal.protection.toFixed(2)}x`,
-      '',
       `📊 Confiança: ${signal.confidence}%`,
       confidenceBar(signal.confidence),
       '',
       `🕐 Enviado às: ${nowTime()}`,
-      '',
       `💫 Plataforma: ${settings.platformName}`
     ].join('\n');
   }
