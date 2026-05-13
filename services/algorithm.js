@@ -1,9 +1,9 @@
 const settings = require('../config/settings');
 
 function analyzeCandles(candles) {
-  if (!candles || candles.length < 8) return null;
+  if (!candles || candles.length < 3) return null;
 
-  const recent = candles.slice(0, 12);
+  const recent = candles.slice(0, Math.min(12, candles.length));
   const low = recent.filter((v) => v < 1.4).length;
   const medium = recent.filter((v) => v >= 1.4 && v < 2).length;
   const high = recent.filter((v) => v >= 2).length;
