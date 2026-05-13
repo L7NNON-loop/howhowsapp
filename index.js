@@ -16,6 +16,7 @@ const commandOn = require('./commands/on');
 const commandOff = require('./commands/off');
 const commandId = require('./commands/id');
 const commandStatus = require('./commands/status');
+const commandDebug = require('./commands/debug');
 
 const logger = pino({
   transport: {
@@ -23,6 +24,9 @@ const logger = pino({
     options: { colorize: true, translateTime: true }
   }
 });
+
+let hasConnectedBefore = false;
+let reconnectTimer = null;
 
 const commands = {
   on: commandOn,
@@ -33,7 +37,8 @@ const commands = {
   stop: commandOff,
   pausar: commandOff,
   id: commandId,
-  status: commandStatus
+  status: commandStatus,
+  debug: commandDebug
 };
 
 async function startBot() {
@@ -50,6 +55,18 @@ async function startBot() {
   });
 
   const signalService = new SignalService(sock, logger);
+
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => {
+    if (hasConnectedBefore) {
+      logger.warn('⌛ 30s sem conectar. Reiniciando sessão para novo QR/pairing code...');
+      try {
+        sock.end(new Error('Connection timeout, forcing new QR'));
+      } catch {
+        // noop
+      }
+    }
+  }, 30000);
 
   sock.ev.on('creds.update', saveCreds);
 
@@ -68,15 +85,21 @@ async function startBot() {
     }
 
     if (connection === 'open') {
+      hasConnectedBefore = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       logger.info('✅ Bot conectado com sucesso.');
       signalService.start();
     }
 
     if (connection === 'close') {
       signalService.stop();
-      const shouldReconnect = (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut);
+      const code = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = code !== DisconnectReason.loggedOut;
       logger.warn('Conexão fechada. Tentando reconectar...');
-      if (shouldReconnect) startBot();
+
+      if (shouldReconnect) {
+        setTimeout(() => startBot().catch((err) => logger.error({ err: err.message }, 'Erro ao reconectar')), 1500);
+      }
     }
   });
 
@@ -102,7 +125,7 @@ async function startBot() {
     }
 
     try {
-      await handler({ sock, message });
+      await handler({ sock, message, signalService });
     } catch (err) {
       logger.error({ err: err.message }, `Erro ao executar comando ${cmd}`);
     }

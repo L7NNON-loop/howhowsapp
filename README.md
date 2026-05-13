@@ -64,6 +64,7 @@ Comandos admin:
 - `.on`, `.ativar`, `.comecar` (autoriza o grupo na whitelist e ativa sinais)
 - `.off`, `.parar`, `.stop`, `.pausar`
 - `.status`
+- `.debug` (diagnóstico de whitelist/estado/última vela)
 
 Comando livre:
 - `.id`
@@ -101,6 +102,25 @@ Esse comando faz automaticamente:
 2. `npm install`
 3. `node index.js`
 
+
+
+## Se `aviator start` não funcionar no Termux
+Isso acontece quando o `npm link` não adicionou o binário ao PATH. Use uma destas opções:
+
+```bash
+cd ~/howhowsapp
+npm run aviator:start
+```
+
+ou
+
+```bash
+cd ~/howhowsapp
+./aviator start
+```
+
+A opção `./aviator start` funciona sempre dentro da pasta do projeto, mesmo sem `npm link`.
+
 ## Se aparecer erro "cd: howhowsapp: No such file or directory"
 Use estes comandos:
 ```bash
@@ -131,3 +151,8 @@ aviator start
 - O bot monitora a API continuamente.
 - Sempre que chegar **nova vela** (`valores[0]` mudou), ele gera e envia novo sinal para grupos autorizados + ativos.
 - Se você mandar `.comecar`, o grupo é adicionado/ativado automaticamente na whitelist.
+
+
+## Reconexão inteligente (sessão removida)
+- Se o bot já esteve conectado antes e ficar **30 segundos** sem reconectar, ele força reinício da conexão para gerar **novo QR e pairing code** automaticamente.
+- Isso resolve o caso de sessão apagada no Termux/Firebase e loop infinito de reconexão sem novo QR.
