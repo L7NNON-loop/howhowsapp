@@ -53,7 +53,7 @@ function analyzeCandles(candles) {
     clamp((highRate - lowRate) * 20, -10, 8) -
     clamp(volatility * 4, 0, 9);
 
-  const confidence = clamp(Math.round(confidenceRaw), 70, 96);
+  const confidence = clamp(Math.round(confidenceRaw), 85, 96);
 
   return {
     after: round2(latest),

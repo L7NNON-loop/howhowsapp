@@ -1,4 +1,6 @@
 const settings = require('../config/settings');
+const fs = require('fs');
+const path = require('path');
 const delay = require('../utils/delay');
 const { nowTime, confidenceBar } = require('../utils/formatters');
 const { fetchCandles } = require('./api');
@@ -80,7 +82,15 @@ class SignalService {
           `🎯 Alvo previsto: ${this.pendingSignal.target.toFixed(2)}x`,
           `🛡 Proteção usada: ${this.pendingSignal.protection.toFixed(2)}x`
         ].join('\n');
-        await this.sock.sendMessage(group.id, { text: msg });
+        const greenImagePath = path.join(process.cwd(), 'green.png');
+        if (fs.existsSync(greenImagePath)) {
+          await this.sock.sendMessage(group.id, {
+            image: fs.readFileSync(greenImagePath),
+            caption: msg
+          });
+        } else {
+          await this.sock.sendMessage(group.id, { text: msg });
+        }
         await delay(settings.messageDelayMs);
       }
       await saveSignalHistory({ type: 'green', currentCandle, signal: this.pendingSignal });
@@ -111,23 +121,20 @@ class SignalService {
     return [
       '🎰 NEXUS AI 🎰',
       '━━━━━━━━━━━━━━',
-      '',
       '✅ ENTRADA CONFIRMADA ✅',
       '',
       '🚀 Aviator',
       '',
       `📊 Após: ${signal.after.toFixed(2)}x`,
-      '',
       `🎯 Sacar em: ${signal.target.toFixed(2)}x`,
-      '',
       `🛡 Proteção: ${signal.protection.toFixed(2)}x`,
-      '',
       `📊 Confiança: ${signal.confidence}%`,
       confidenceBar(signal.confidence),
       '',
       `🕐 Enviado às: ${nowTime()}`,
+      `💫 Plataforma: ${settings.platformName}`,
       '',
-      `💫 Plataforma: ${settings.platformName}`
+      '🔗 https://sl1nk.com/ganhar-acesso-vip-100'
     ].join('\n');
   }
 }
