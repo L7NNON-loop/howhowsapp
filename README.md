@@ -61,7 +61,7 @@ Arquivo de ajustes em `config/settings.js`:
 > `.id` pode ser usado normalmente no grupo para descobrir o ID.
 
 Comandos admin:
-- `.on`, `.ativar`, `.comecar` (autoriza o grupo na whitelist e ativa sinais)
+- `.on`, `.ativar`, `.comecar` (autoriza o grupo na whitelist, ativa sinais e tenta enviar uma entrada imediata)
 - `.off`, `.parar`, `.stop`, `.pausar`
 - `.status`
 - `.debug` (diagnóstico de whitelist/estado/última vela)

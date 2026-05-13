@@ -92,6 +92,23 @@ class SignalService {
     this.pendingSignal = null;
   }
 
+
+  async triggerImmediateSignalForGroup(groupId) {
+    const candles = await fetchCandles();
+    const signal = analyzeCandles(candles);
+    if (!signal) return { sent: false, reason: 'Sem dados suficientes para análise.' };
+
+    this.pendingSignal = { ...signal, createdAt: Date.now() };
+    await saveSignalHistory({ type: 'signal_manual', ...signal, groupId });
+
+    if (!(await isGroupSignalActive(groupId))) {
+      return { sent: false, reason: 'Grupo não está ativo para sinais.' };
+    }
+
+    await this.sock.sendMessage(groupId, { text: this.buildSignalMessage(signal) });
+    return { sent: true, signal };
+  }
+
   buildSignalMessage(signal) {
     return [
       '🎰 NEXUS AI 🎰',
