@@ -51,7 +51,7 @@ class SignalService {
 
   async generateAndSendSignal(candles) {
     const signal = analyzeCandles(candles);
-    if (!signal || signal.confidence < settings.confidenceThreshold) return;
+    if (!signal) return;
 
     this.pendingSignal = { ...signal, createdAt: Date.now() };
     await saveSignalHistory({ type: 'signal', ...signal });

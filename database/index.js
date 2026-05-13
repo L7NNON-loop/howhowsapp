@@ -22,14 +22,6 @@ async function ensureBaseStructure() {
       slot4: { id: '120000000000004@g.us', ativo: false, nome: 'SLOT 4' },
       slot5: { id: '120000000000005@g.us', ativo: false, nome: 'SLOT 5' }
     });
-  } else {
-    const groups = groupsSnap.val() || {};
-    const hasMainGroup = Object.values(groups).some((g) => g?.id === '120363425136994613@g.us');
-    if (!hasMainGroup) {
-      await update(groupsRef, {
-        slot1: { id: '120363425136994613@g.us', ativo: true, nome: 'Sala VIP Principal' }
-      });
-    }
   }
 
   if (!statusSnap.exists()) {
@@ -45,6 +37,27 @@ async function getAuthorizedGroups() {
   const snap = await get(child(rootRef, 'grupos'));
   if (!snap.exists()) return [];
   return Object.values(snap.val()).filter((g) => g?.id && g?.ativo);
+}
+
+async function authorizeGroup(groupId, groupName = 'Grupo') {
+  const groupsRef = child(rootRef, 'grupos');
+  const snap = await get(groupsRef);
+  const groups = snap.exists() ? snap.val() : {};
+
+  const existingKey = Object.keys(groups).find((k) => groups[k]?.id === groupId);
+  if (existingKey) {
+    await update(child(rootRef, `grupos/${existingKey}`), { ativo: true, nome: groupName });
+    return;
+  }
+
+  const freeSlot = ['slot1', 'slot2', 'slot3', 'slot4', 'slot5'].find((slot) => !groups[slot] || !groups[slot]?.id || groups[slot]?.ativo === false);
+  if (freeSlot) {
+    await update(groupsRef, { [freeSlot]: { id: groupId, ativo: true, nome: groupName } });
+    return;
+  }
+
+  const customKey = `grupo_${Date.now()}`;
+  await update(groupsRef, { [customKey]: { id: groupId, ativo: true, nome: groupName } });
 }
 
 async function setGroupSignalState(groupId, active) {
@@ -83,6 +96,7 @@ function sanitizeKey(value) {
 module.exports = {
   ensureBaseStructure,
   getAuthorizedGroups,
+  authorizeGroup,
   setGroupSignalState,
   isGroupSignalActive,
   saveSignalHistory,

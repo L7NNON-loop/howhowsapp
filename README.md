@@ -61,7 +61,7 @@ Arquivo de ajustes em `config/settings.js`:
 > `.id` pode ser usado normalmente no grupo para descobrir o ID.
 
 Comandos admin:
-- `.on`, `.ativar`, `.comecar`
+- `.on`, `.ativar`, `.comecar` (autoriza o grupo na whitelist e ativa sinais)
 - `.off`, `.parar`, `.stop`, `.pausar`
 - `.status`
 
@@ -125,3 +125,9 @@ aviator start
 - A API monitorada é: `https://app.sscashout.online/api/velas`
 - A vela mais recente é sempre `valores[0]`.
 - O bot só envia para grupos **ativos + autorizados** no Firebase.
+
+
+## Funcionamento dos sinais
+- O bot monitora a API continuamente.
+- Sempre que chegar **nova vela** (`valores[0]` mudou), ele gera e envia novo sinal para grupos autorizados + ativos.
+- Se você mandar `.comecar`, o grupo é adicionado/ativado automaticamente na whitelist.
